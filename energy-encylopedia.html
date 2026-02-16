@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Energy Vault - Renewables Encyclopedia</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f0f8ff;
+      color: #333;
+    }
+    h1 { text-align: center; color: #006400; }
+    header {
+      text-align: right;
+      padding: 10px;
+      background: #228b22;
+      color: white;
+    }
+    #user-info { margin-right: 10px; }
+    button {
+      background: #006400;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+      margin-left: 10px;
+      border-radius: 4px;
+    }
+    nav {
+      text-align: center;
+      margin: 20px 0;
+    }
+    nav button {
+      margin: 5px;
+      padding: 10px 15px;
+      background: #228b22;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    nav button:hover { background: #006400; }
+    #main-content {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    section { display: none; }
+    section.active { display: block; }
+    .energy-section h2 { color: #006400; }
+    .energy-section p { line-height: 1.6; }
+
+    .edit-btn, .update-btn {
+      background: #ff8c00;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      margin: 10px 5px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .edit-btn:hover { background: #ff4500; }
+
+    .suggestions {
+      margin-top: 20px;
+      padding: 10px;
+      background: #e6ffe6;
+      border-left: 4px solid #228b22;
+    }
+    .suggestion {
+      margin-bottom: 10px;
+      padding: 8px;
+      background: white;
+      border-radius: 4px;
+    }
+
+    .comments {
+      margin-top: 30px;
+      padding: 15px;
+      background: #f9fff9;
+      border-radius: 6px;
+      border: 1px solid #d0e8d0;
+    }
+    .comments h3 { color: #006400; margin-top: 0; }
+    .comment-rules {
+      background: #fff3cd;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      font-size: 0.92em;
+      color: #856404;
+    }
+    .comment {
+      margin: 16px 0;
+      padding: 12px 16px;
+      background: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+    .comment.reply-level-1 { margin-left: 32px; background: #f8fff8; border-left: 3px solid #a8d0a8; }
+    .comment.reply-level-2 { margin-left: 64px; background: #f0fff0; border-left: 3px solid #80b080; }
+    .comment-text { line-height: 1.5; white-space: pre-wrap; }
+    .reply-btn {
+      background: none;
+      border: none;
+      color: #1e88e5;
+      cursor: pointer;
+    }
+
+    .reply-form {
+      margin-top: 12px;
+      padding: 10px;
+      background: #f5faff;
+      border-radius: 6px;
+      border: 1px dashed #bbdefb;
+      display: none;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+    }
+    .modal-content {
+      background: white;
+      margin: 8% auto;
+      padding: 25px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 420px;
+    }
+
+    /* Reactions */
+    .reactions-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .reaction {
+      background: #f0f0f0;
+      border-radius: 12px;
+      padding: 4px 8px;
+      cursor: pointer;
+    }
+    .reaction.active {
+      background: #ffebee;
+      border: 1px solid #ef9a9a;
+    }
+    .add-reaction-btn {
+      background: none;
+      border: none;
+      color: #757575;
+      font-size: 1.3em;
+      cursor: pointer;
+    }
+    .emoji-picker {
+      position: absolute;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      padding: 8px;
+      display: none;
+      flex-wrap: wrap;
+      gap: 8px;
+      max-width: 240px;
+      z-index: 100;
+    }
+    .emoji-picker span {
+      font-size: 1.6em;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    /* TTS */
+    .speak-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: 8px;
+    }
+    .speak-btn, .pause-btn {
+      background: none;
+      border: none;
+      color: #006400;
+      font-size: 1.3em;
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 50%;
+    }
+    .speak-btn.speaking, .pause-btn.active {
+      color: #d32f2f;
+      animation: pulse 1.2s infinite;
+    }
+    .pause-btn { display: none; }
+    .pause-btn.visible { display: inline-block; }
+    .status-speak {
+      font-size: 0.8em;
+      color: #666;
+      min-width: 60px;
+    }
+
+    /* Media */
+    .section-media {
+      margin: 16px 0;
+      text-align: center;
+    }
+    .section-media img, .section-media video, .section-media iframe {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+    }
+    .media-update-form {
+      display: none;
+      margin: 16px 0;
+      padding: 16px;
+      background: #f8fff8;
+      border: 1px dashed #a8d0a8;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <span id="user-info">Visitor</span>
+  <button id="login-btn">Login</button>
+  <button id="register-btn">Register</button>
+  <button id="logout-btn" style="display:none;">Logout</button>
+  <span id="notification-bell" title="Notifications" style="cursor:pointer; margin:0 15px; font-size:1.3em; position:relative;">
+    🔔
+    <span id="notif-count" style="position:absolute;top:-8px;right:-10px;background:#f44336;color:white;border-radius:50%;padding:2px 6px;font-size:0.7em;display:none;">0</span>
+  </span>
+</header>
+
+<h1>Energy Vault - Renewables Encyclopedia</h1>
+
+<nav>
+  <button onclick="showSection('wind')">Wind</button>
+  <button onclick="showSection('solar')">Solar</button>
+  <button onclick="showSection('hydro')">Hydro</button>
+  <button onclick="showSection('thermal')">Thermal</button>
+  <button onclick="showSection('biomass')">Biomass</button>
+  <button onclick="showSection('geothermal')">Geothermal</button>
+  <button onclick="showSection('tidal')">Tidal</button>
+  <button onclick="showSection('wave')">Wave</button>
+  <button onclick="showSection('general')">General Discussions</button>
+</nav>
+
+<div id="main-content">
+  <!-- Wind example – repeat pattern for others -->
+  <div id="wind" class="energy-section section">
+    <h2>Wind Energy</h2>
+
+    <div class="section-media" id="media-wind"></div>
+
+    <p id="wind-content">Wind energy harnesses the power of wind to generate electricity using turbines. It's one of the fastest-growing renewable sources.</p>
+
+    <button class="edit-btn" onclick="openEdit('wind')" style="display:none;">Edit Text</button>
+    <button class="update-btn" onclick="openUpdate('wind')">Suggest Update</button>
+
+    <button class="edit-btn" onclick="toggleMediaForm('wind')" style="display:none;">Update Media</button>
+
+    <div class="media-update-form" id="media-form-wind">
+      <input type="url" id="media-image-wind" placeholder="Image URL (jpg/png/etc)" />
+      <input type="url" id="media-video-wind" placeholder="Video URL (YouTube or .mp4)" />
+      <button onclick="saveSectionMedia('wind')">Save</button>
+      <button onclick="toggleMediaForm('wind')">Cancel</button>
+    </div>
+
+    <div id="wind-suggestions" class="suggestions"></div>
+
+    <div class="comments">
+      <h3>Discussions</h3>
+      <div class="comment-rules">Keep focused on wind energy topics.</div>
+      <div class="new-comment-form">
+        <textarea id="wind-new-comment" placeholder="Start a discussion..." class="hidden"></textarea>
+        <button class="post-btn hidden" onclick="addComment('wind', null)">Post</button>
+      </div>
+      <div id="wind-comment-list" class="comment-list"></div>
+    </div>
+  </div>
+
+  <!-- Repeat similar structure for solar, hydro, thermal, biomass, geothermal, tidal, wave -->
+
+  <!-- General -->
+  <div id="general" class="section">
+    <h2>General Discussions</h2>
+    <p>Off-topic or general energy questions go here.</p>
+    <div class="comments">
+      <h3>Open Forum</h3>
+      <div class="new-comment-form">
+        <textarea id="general-new-comment" placeholder="Start a conversation..." class="hidden"></textarea>
+        <button class="post-btn hidden" onclick="addComment('general', null)">Post</button>
+      </div>
+      <div id="general-comment-list" class="comment-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Login Modal -->
+<div id="login-modal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('login-modal')">×</span>
+    <h3>Login</h3>
+    <form id="login-form">
+      <input type="email" id="login-email" placeholder="Email" required>
+      <input type="password" id="login-password" placeholder="Password" required>
+      <button type="submit">Login</button>
+    </form>
+  </div>
+</div>
+
+<!-- Register Modal -->
+<div id="register-modal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('register-modal')">×</span>
+    <h3>Register</h3>
+    <form id="register-form">
+      <input type="text" id="reg-username" placeholder="Username (optional)">
+      <input type="email" id="reg-email" placeholder="Email" required>
+      <div id="email-error" class="error"></div>
+      <input type="password" id="reg-password" placeholder="Password" required>
+      <div id="password-error" class="error"></div>
+      <input type="password" id="reg-confirm-password" placeholder="Confirm Password" required>
+      <div id="confirm-error" class="error"></div>
+      <button type="submit" id="register-submit-btn">Register</button>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="edit-modal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('edit-modal')">×</span>
+    <h3>Edit Content</h3>
+    <form id="edit-form">
+      <textarea id="edit-content" rows="12" required></textarea>
+      <button type="submit">Save</button>
+    </form>
+  </div>
+</div>
+
+<!-- Update Suggestion Modal -->
+<div id="update-modal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('update-modal')">×</span>
+    <h3>Suggest Update</h3>
+    <form id="update-form">
+      <textarea id="update-suggestion" rows="6" required></textarea>
+      <button type="submit">Submit</button>
+    </form>
+  </div>
+</div>
+
+<div id="toast-container" style="position:fixed; bottom:20px; right:20px; z-index:9999;"></div>
+
+<script>
+  // ────────────────────────────────────────────────
+  // Data
+  // ────────────────────────────────────────────────
+  let currentUser = JSON.parse(localStorage.getItem('currentUser')) || { role: 'visitor', email: '', username: '' };
+
+  let users = JSON.parse(localStorage.getItem('users')) || [
+    { email: 'admin@example.com', password: 'admin', role: 'admin', username: 'Admin' },
+    { email: 'mod@example.com', password: 'mod', role: 'moderator', username: 'Moderator' },
+    { email: 'user@example.com', password: 'user', role: 'basic', username: 'DemoUser' }
+  ];
+
+  let encyclopedia = JSON.parse(localStorage.getItem('encyclopedia')) || {
+    wind:      { content: "Wind energy harnesses the power of wind...", suggestions: [], media: { imageUrl: "", videoUrl: "" } },
+    solar:     { content: "Solar power converts sunlight...", suggestions: [], media: { imageUrl: "", videoUrl: "" } },
+    hydro:     { content: "Hydroelectric power uses flowing water...", suggestions: [], media: { imageUrl: "", videoUrl: "" } },
+    thermal:   { content: "Thermal energy exploits temperature differences...", suggestions: [], media: { imageUrl: "", videoUrl: "" } },
+    biomass:   { content: "Biomass converts organic materials...", suggestions: [], media: { imageUrl: "", videoUrl: "" } },
+    geothermal:{ content: "Geothermal taps into Earth's heat...", suggestions: [], media: { imageUrl: "", videoUrl: "" } },
+    tidal:     { content: "Tidal power uses tides...", suggestions: [], media: { imageUrl: "", videoUrl: "" } },
+    wave:      { content: "Wave energy captures ocean waves...", suggestions: [], media: { imageUrl: "", videoUrl: "" } }
+  };
+
+  let comments = JSON.parse(localStorage.getItem('comments')) || {
+    wind: [], solar: [], hydro: [], thermal: [], biomass: [], geothermal: [], tidal: [], wave: [], general: []
+  };
+
+  let notifications = JSON.parse(localStorage.getItem('notifications')) || [];
+  let commentIdCounter = parseInt(localStorage.getItem('commentIdCounter') || '0');
+
+  const COMMON_EMOJIS = ['👍','❤️','😂','😮','😢','😡','🙌','🔥','👏','🤔','🎉','💯','🤯','😍','🥳','👀','💪','✨','🙏','🚀'];
+
+  // ────────────────────────────────────────────────
+  // UI & Helpers
+  // ────────────────────────────────────────────────
+  function updateUI() {
+    const isVisitor = currentUser.role === 'visitor';
+    document.getElementById('user-info').textContent = isVisitor ? 'Visitor' : 
+      `${currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1)} (${currentUser.username || currentUser.email.split('@')[0]})`;
+
+    document.getElementById('login-btn').style.display = isVisitor ? 'inline' : 'none';
+    document.getElementById('register-btn').style.display = isVisitor ? 'inline' : 'none';
+    document.getElementById('logout-btn').style.display = isVisitor ? 'none' : 'inline';
+
+    document.querySelectorAll('.edit-btn').forEach(el => 
+      el.style.display = ['admin','moderator'].includes(currentUser.role) ? 'inline' : 'none');
+
+    document.querySelectorAll('.new-comment-form textarea, .new-comment-form button').forEach(el => 
+      el.classList.toggle('hidden', isVisitor));
+
+    updateNotificationUI();
+    loadCommentsForActiveSection();
+  }
+
+  function showSection(id) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    if (id !== 'general') {
+      document.getElementById(`${id}-content`).textContent = encyclopedia[id].content;
+      renderSectionMedia(id);
+    }
+    loadSuggestions();
+    loadCommentsForActiveSection();
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).style.display = 'none';
+  }
+
+  // ... (keep your existing login, register, edit, update, comment, reaction, TTS, STT, notification functions here) ...
+
+  // Media functions
+  function toggleMediaForm(section) {
+    const form = document.getElementById(`media-form-${section}`);
+    form.style.display = form.style.display === 'block' ? 'none' : 'block';
+  }
+
+  function saveSectionMedia(section) {
+    const image = document.getElementById(`media-image-${section}`).value.trim();
+    const video = document.getElementById(`media-video-${section}`).value.trim();
+
+    encyclopedia[section].media = { imageUrl: image || '', videoUrl: video || '' };
+    localStorage.setItem('encyclopedia', JSON.stringify(encyclopedia));
+    renderSectionMedia(section);
+    toggleMediaForm(section);
+  }
+
+  function renderSectionMedia(section) {
+    const container = document.getElementById(`media-${section}`);
+    const m = encyclopedia[section]?.media || {};
+    let html = '';
+
+    if (m.imageUrl) html += `<img src="${m.imageUrl}" alt="${section}" loading="lazy"><br>`;
+    if (m.videoUrl) {
+      if (m.videoUrl.includes('youtube.com') || m.videoUrl.includes('youtu.be')) {
+        const id = m.videoUrl.match(/(?:v=|youtu\.be\/)([^&\n?#]+)/)?.[1];
+        if (id) html += `<iframe width="560" height="315" src="https://www.youtube.com/embed/${id}" frameborder="0" allowfullscreen></iframe>`;
+      } else {
+        html += `<video controls><source src="${m.videoUrl}" type="video/mp4"></video>`;
+      }
+    }
+    container.innerHTML = html;
+  }
+
+  // Init
+  updateUI();
+  showSection('wind');
+</script>
+</body>
+</html>
