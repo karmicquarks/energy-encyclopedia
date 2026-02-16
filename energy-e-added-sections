@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Energy Vault - Renewables Encyclopedia</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f0f8ff; color: #333; }
+    h1 { text-align: center; color: #006400; }
+    header { text-align: right; padding: 10px; background: #228b22; color: white; }
+    #user-info { margin-right: 10px; }
+    button { background: #006400; color: white; border: none; padding: 5px 10px; cursor: pointer; margin-left: 10px; border-radius: 4px; }
+    nav { text-align: center; margin: 20px 0; }
+    nav button { margin: 5px; padding: 10px 15px; background: #228b22; color: white; border: none; border-radius: 6px; cursor: pointer; }
+    nav button:hover { background: #006400; }
+    #main-content { max-width: 900px; margin: 0 auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    section { display: none; }
+    section.active { display: block; }
+    .energy-section h2 { color: #006400; }
+    .energy-section p { line-height: 1.6; }
+    .edit-btn, .update-btn { background: #ff8c00; color: white; border: none; padding: 8px 15px; margin: 10px 5px; border-radius: 4px; cursor: pointer; }
+    .edit-btn:hover { background: #ff4500; }
+    .suggestions { margin-top: 20px; padding: 10px; background: #e6ffe6; border-left: 4px solid #228b22; }
+    .suggestion { margin-bottom: 10px; padding: 8px; background: white; border-radius: 4px; }
+    .comments { margin-top: 30px; padding: 15px; background: #f9fff9; border-radius: 6px; border: 1px solid #d0e8d0; }
+    .comment { margin: 16px 0; padding: 12px 16px; background: white; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    .comment.reply-level-1 { margin-left: 32px; background: #f8fff8; border-left: 3px solid #a8d0a8; }
+    .comment.reply-level-2 { margin-left: 64px; background: #f0fff0; border-left: 3px solid #80b080; }
+    .reply-btn { background: none; border: none; color: #1e88e5; cursor: pointer; }
+    .reply-form { margin-top: 12px; padding: 10px; background: #f5faff; border-radius: 6px; border: 1px dashed #bbdefb; display: none; }
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; }
+    .modal-content { background: white; margin: 8% auto; padding: 25px; border-radius: 8px; width: 90%; max-width: 420px; }
+    .section-media { margin: 16px 0; text-align: center; }
+    .section-media img, .section-media video, .section-media iframe { max-width: 100%; height: auto; border-radius: 8px; }
+    .media-update-form { display: none; margin: 16px 0; padding: 16px; background: #f8fff8; border: 1px dashed #a8d0a8; border-radius: 8px; }
+    .reactions-bar { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .reaction { background: #f0f0f0; border-radius: 12px; padding: 4px 8px; cursor: pointer; }
+    .reaction.active { background: #ffebee; border: 1px solid #ef9a9a; }
+    .speak-group { display: inline-flex; align-items: center; gap: 4px; margin-left: 8px; }
+    .speak-btn, .pause-btn { background: none; border: none; color: #006400; font-size: 1.3em; cursor: pointer; padding: 4px 6px; border-radius: 50%; }
+    .speak-btn.speaking, .pause-btn.active { color: #d32f2f; animation: pulse 1.2s infinite; }
+    .pause-btn { display: none; }
+    .pause-btn.visible { display: inline-block; }
+    .status-speak { font-size: 0.8em; color: #666; min-width: 60px; }
+    #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; }
+  </style>
+</head>
+<body>
+
+<header>
+  <span id="user-info">Visitor</span>
+  <button id="login-btn">Login</button>
+  <button id="register-btn">Register</button>
+  <button id="logout-btn" style="display:none;">Logout</button>
+  <span id="notification-bell" title="Notifications" style="cursor:pointer; margin:0 15px; font-size:1.3em; position:relative;">
+    🔔 <span id="notif-count" style="position:absolute;top:-8px;right:-10px;background:#f44336;color:white;border-radius:50%;padding:2px 6px;font-size:0.7em;display:none;">0</span>
+  </span>
+</header>
+
+<h1>Energy Vault - Renewables Encyclopedia</h1>
+
+<nav>
+  <button onclick="showSection('wind')">Wind</button>
+  <button onclick="showSection('solar')">Solar</button>
+  <button onclick="showSection('hydro')">Hydro</button>
+  <button onclick="showSection('thermal')">Thermal</button>
+  <button onclick="showSection('biomass')">Biomass</button>
+  <button onclick="showSection('geothermal')">Geothermal</button>
+  <button onclick="showSection('tidal')">Tidal</button>
+  <button onclick="showSection('wave')">Wave</button>
+  <button onclick="showSection('general')">General Discussions</button>
+</nav>
+
+<div id="main-content">
+
+  <!-- Wind -->
+  <div id="wind" class="energy-section section">
+    <h2>Wind Energy</h2>
+    <div class="section-media" id="media-wind"></div>
+    <p id="wind-content">Wind energy harnesses the power of wind to generate electricity using turbines. It's one of the fastest-growing renewable sources.</p>
+    <button class="edit-btn" onclick="openEdit('wind')" style="display:none;">Edit Text</button>
+    <button class="update-btn" onclick="openUpdate('wind')">Suggest Update</button>
+    <button class="edit-btn" onclick="toggleMediaForm('wind')" style="display:none;">Update Media</button>
+    <div class="media-update-form" id="media-form-wind">
+      <input type="url" id="media-image-wind" placeholder="Image URL">
+      <input type="url" id="media-video-wind" placeholder="Video URL (YouTube or .mp4)">
+      <button onclick="saveSectionMedia('wind')">Save</button>
+      <button onclick="toggleMediaForm('wind')">Cancel</button>
+    </div>
+    <div id="wind-suggestions" class="suggestions"></div>
+    <div class="comments">
+      <h3>Discussions</h3>
+      <div class="new-comment-form">
+        <textarea id="wind-new-comment" placeholder="Start a discussion..." class="hidden"></textarea>
+        <button class="post-btn hidden" onclick="addComment('wind', null)">Post</button>
+      </div>
+      <div id="wind-comment-list" class="comment-list"></div>
+    </div>
+  </div>
+
+  <!-- Solar -->
+  <div id="solar" class="energy-section section">
+    <h2>Solar Energy</h2>
+    <div class="section-media" id="media-solar"></div>
+    <p id="solar-content">Solar power converts sunlight into electricity via photovoltaic panels or concentrated solar power systems.</p>
+    <button class="edit-btn" onclick="openEdit('solar')" style="display:none;">Edit Text</button>
+    <button class="update-btn" onclick="openUpdate('solar')">Suggest Update</button>
+    <button class="edit-btn" onclick="toggleMediaForm('solar')" style="display:none;">Update Media</button>
+    <div class="media-update-form" id="media-form-solar">
+      <input type="url" id="media-image-solar" placeholder="Image URL">
+      <input type="url" id="media-video-solar" placeholder="Video URL (YouTube or .mp4)">
+      <button onclick="saveSectionMedia('solar')">Save</button>
+      <button onclick="toggleMediaForm('solar')">Cancel</button>
+    </div>
+    <div id="solar-suggestions" class="suggestions"></div>
+    <div class="comments">
+      <h3>Discussions</h3>
+      <div class="new-comment-form">
+        <textarea id="solar-new-comment" placeholder="Start a discussion..." class="hidden"></textarea>
+        <button class="post-btn hidden" onclick="addComment('solar', null)">Post</button>
+      </div>
+      <div id="solar-comment-list" class="comment-list"></div>
+    </div>
+  </div>
+
+  <!-- Hydro -->
+  <div id="hydro" class="energy-section section">
+    <h2>Hydro Energy</h2>
+    <div class="section-media" id="media-hydro"></div>
+    <p id="hydro-content">Hydroelectric power uses flowing water to spin turbines, providing a reliable renewable energy source.</p>
+    <button class="edit-btn" onclick="openEdit('hydro')" style="display:none;">Edit Text</button>
+    <button class="update-btn" onclick="openUpdate('hydro')">Suggest Update</button>
+    <button class="edit-btn" onclick="toggleMediaForm('hydro')" style="display:none;">Update Media</button>
+    <div class="media-update-form" id="media-form-hydro">
+      <input type="url" id="media-image-hydro" placeholder="Image URL">
+      <input type="url" id="media-video-hydro" placeholder="Video URL (YouTube or .mp4)">
+      <button onclick="saveSectionMedia('hydro')">Save</button>
+      <button onclick="toggleMediaForm('hydro')">Cancel</button>
+    </div>
+    <div id="hydro-suggestions" class="suggestions"></div>
+    <div class="comments">
+      <h3>Discussions</h3>
+      <div class="new-comment-form">
+        <textarea id="hydro-new-comment" placeholder="Start a discussion..." class="hidden"></textarea>
+        <button class="post-btn hidden" onclick="addComment('hydro', null)">Post</button>
+      </div>
+      <div id="hydro-comment-list" class="comment-list"></div>
+    </div>
+  </div>
+
+  <!-- Thermal -->
+  <div id="thermal" class="energy-section section">
+    <h2>Thermal Energy</h2>
+    <div class="section-media" id="media-thermal"></div>
+    <p id="thermal-content">Thermal energy from sources like ocean thermal or solar thermal exploits temperature differences for power generation.</p>
+    <button class="edit-btn" onclick="openEdit('thermal')" style="display:none;">Edit Text</button>
+    <button class="update-btn" onclick="openUpdate('thermal')">Suggest Update</button>
+    <button class="edit-btn" onclick="toggleMediaForm('thermal')" style="display:none;">Update Media</button>
+    <div class="media-update-form" id="media-form-thermal">
+      <input type="url" id="media-image-thermal" placeholder="Image URL">
+      <input type="url" id="media-video-thermal" placeholder="Video URL (YouTube or .mp4)">
+      <button onclick="saveSectionMedia('thermal')">Save</button>
+      <button onclick="toggleMediaForm('thermal')">Cancel</button>
+    </div>
+    <div id="thermal-suggestions" class="suggestions"></div>
+    <div class="comments">
+      <h3>Discussions</h3>
+      <div class="new-comment-form">
+        <textarea id="thermal-new-comment" placeholder="Start a discussion..." class="hidden"></textarea>
+        <button class="post-btn hidden" onclick="addComment('thermal', null)">Post</button>
+      </div>
+      <div id="thermal-comment-list" class="comment-list"></div>
+    </div>
+  </div>
+
+  <!-- Biomass -->
+  <div id="biomass" class="energy-section section">
+    <h2>Biomass Energy</h2>
+    <div class="section-media" id="media-biomass"></div>
+    <p id="biomass-content">Biomass converts organic materials like plants and waste into energy through combustion or biofuels.</p>
+    <button class="edit-btn" onclick="openEdit('biomass')" style="display:none;">Edit Text</button>
+    <button class="update-btn" onclick="openUpdate('biomass')">Suggest Update</button>
+    <button class="edit-btn" onclick="toggleMediaForm('biomass')" style="display:none;">Update Media</button>
+    <div class="media-update-form" id="media-form-biomass">
+      <input type="url" id="media-image-biomass" placeholder="Image URL">
+      <input type="url" id="media-video-biomass" placeholder="Video URL (YouTube or .mp4)">
+      <button onclick="saveSectionMedia('biomass')">Save</button>
+      <button onclick="toggleMediaForm('biomass')">Cancel</button>
+    </div>
+    <div id="biomass-suggestions" class="suggestions"></div>
+    <div class="comments">
+      <h3>Discussions</h3>
+      <div class="new-comment-form">
+        <textarea id="biomass-new-comment" placeholder="Start a discussion..." class="hidden"></textarea>
+        <button class="post-btn hidden" onclick="addComment('biomass', null)">Post</button>
+      </div>
+      <div id="biomass-comment-list" class="comment-list"></div>
+    </div>
+  </div>
+
+  <!-- Geothermal -->
+  <div id="geothermal" class="energy-section section">
+    <h2>Geothermal Energy</h2>
+    <div class="section-media" id="media-geothermal"></div>
+    <p id="geothermal-content">Geothermal taps into Earth's internal heat for electricity and heating, available in volcanic regions.</p>
+    <button class="edit-btn" onclick="openEdit('geothermal')" style="display:none;">Edit Text</button>
+    <button class="update-btn" onclick="openUpdate('geothermal')">Suggest Update</button>
+    <button class="edit-btn" onclick="toggleMediaForm('geothermal')" style="display:none;">Update Media</button>
+    <div class="media-update-form" id="media-form-geothermal">
+      <input type="url" id="media-image-geothermal" placeholder="Image URL">
+      <input type="url" id="media-video-geothermal" placeholder="Video URL (YouTube or .mp4)">
+      <button onclick="saveSectionMedia('geothermal')">Save</button>
+      <button onclick="toggleMediaForm('geothermal')">Cancel</button>
+    </div>
+    <div id="geothermal-suggestions" class="suggestions"></div>
+    <div class="comments">
+      <h3>Discussions</h3>
+      <div class="new-comment-form">
+        <textarea id="geothermal-new-comment" placeholder="Start a discussion..." class="hidden"></textarea>
+        <button class="post-btn hidden" onclick="addComment('geothermal', null)">Post</button>
+      </div>
+      <div id="geothermal-comment-list" class="comment-list"></div>
+    </div>
+  </div>
+
+  <!-- Tidal -->
+  <div id="tidal" class="energy-section section">
+    <h2>Tidal Energy</h2>
+    <div class="section-media" id="media-tidal"></div>
+    <p id="tidal-content">Tidal power uses the rise and fall of tides to generate electricity via underwater turbines.</p>
+    <button class="edit-btn" onclick="openEdit('tidal')" style="display:none;">Edit Text</button>
+    <button class="update-btn" onclick="openUpdate('tidal')">Suggest Update</button>
+    <button class="edit-btn" onclick="toggleMediaForm('tidal')" style="display:none;">Update Media</button>
+    <div class="media-update-form" id="media-form-tidal">
+      <input type="url" id="media-image-tidal" placeholder="Image URL">
+      <input type="url" id="media-video-tidal" placeholder="Video URL (YouTube or .mp4)">
+      <button onclick="saveSectionMedia('tidal')">Save</button>
+      <button onclick="toggleMediaForm('tidal')">Cancel</button>
+    </div>
+    <div id="tidal-suggestions" class="suggestions"></div>
+    <div class="comments">
+      <h3>Discussions</h3>
+      <div class="new-comment-form">
+        <textarea id="tidal-new-comment" placeholder="Start a discussion..." class="hidden"></textarea>
+        <button class="post-btn hidden" onclick="addComment('tidal', null)">Post</button>
+      </div>
+      <div id="tidal-comment-list" class="comment-list"></div>
+    </div>
+  </div>
+
+  <!-- Wave -->
+  <div id="wave" class="energy-section section">
+    <h2>Wave Energy</h2>
+    <div class="section-media" id="media-wave"></div>
+    <p id="wave-content">Wave energy captures ocean waves' motion to produce power, often using floating devices.</p>
+    <button class="edit-btn" onclick="openEdit('wave')" style="display:none;">Edit Text</button>
+    <button class="update-btn" onclick="openUpdate('wave')">Suggest Update</button>
+    <button class="edit-btn" onclick="toggleMediaForm('wave')" style="display:none;">Update Media</button>
+    <div class="media-update-form" id="media-form-wave">
+      <input type="url" id="media-image-wave" placeholder="Image URL">
+      <input type="url" id="media-video-wave" placeholder="Video URL (YouTube or .mp4)">
+      <button onclick="saveSectionMedia('wave')">Save</button>
+      <button onclick="toggleMediaForm('wave')">Cancel</button>
+    </div>
+    <div id="wave-suggestions" class="suggestions"></div>
+    <div class="comments">
+      <h3>Discussions</h3>
+      <div class="new-comment-form">
+        <textarea id="wave-new-comment" placeholder="Start a discussion..." class="hidden"></textarea>
+        <button class="post-btn hidden" onclick="addComment('wave', null)">Post</button>
+      </div>
+      <div id="wave-comment-list" class="comment-list"></div>
+    </div>
+  </div>
+
+  <!-- General Discussions -->
+  <div id="general" class="section">
+    <h2>General Discussions</h2>
+    <p>Use this section for off-topic questions, random ideas, or anything not specific to one energy type.</p>
+    <div class="comments">
+      <h3>Open Forum</h3>
+      <div class="new-comment-form">
+        <textarea id="general-new-comment" placeholder="Start a general conversation..." class="hidden"></textarea>
+        <button class="post-btn hidden" onclick="addComment('general', null)">Post</button>
+      </div>
+      <div id="general-comment-list" class="comment-list"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modals (login, register, edit, update) -->
+<div id="login-modal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('login-modal')">×</span>
+    <h3>Login</h3>
+    <form id="login-form">
+      <input type="email" id="login-email" placeholder="Email" required>
+      <input type="password" id="login-password" placeholder="Password" required>
+      <button type="submit">Login</button>
+    </form>
+  </div>
+</div>
+
+<div id="register-modal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('register-modal')">×</span>
+    <h3>Register</h3>
+    <form id="register-form">
+      <input type="text" id="reg-username" placeholder="Username (optional)">
+      <input type="email" id="reg-email" placeholder="Email" required>
+      <input type="password" id="reg-password" placeholder="Password" required>
+      <input type="password" id="reg-confirm-password" placeholder="Confirm Password" required>
+      <button type="submit">Register</button>
+    </form>
+  </div>
+</div>
+
+<div id="edit-modal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('edit-modal')">×</span>
+    <h3>Edit Section</h3>
+    <form id="edit-form">
+      <textarea id="edit-content" rows="12" required></textarea>
+      <button type="submit">Save</button>
+    </form>
+  </div>
+</div>
+
+<div id="update-modal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('update-modal')">×</span>
+    <h3>Suggest Update</h3>
+    <form id="update-form">
+      <textarea id="update-suggestion" rows="6" required></textarea>
+      <button type="submit">Submit</button>
+    </form>
+  </div>
+</div>
+
+<div id="toast-container" style="position:fixed; bottom:20px; right:20px; z-index:9999;"></div>
+
+<script>
+  // ────────────────────────────────────────────────
+  // Data
+  // ────────────────────────────────────────────────
+  let currentUser = JSON.parse(localStorage.getItem('currentUser')) || { role: 'visitor', email: '', username: '' };
+  let users = JSON.parse(localStorage.getItem('users')) || [
+    { email: 'admin@example.com', password: 'admin', role: 'admin', username: 'Admin' },
+    { email: 'mod@example.com', password: 'mod', role: 'moderator', username: 'Moderator' },
+    { email: 'user@example.com', password: 'user', role: 'basic', username: 'DemoUser' }
+  ];
+  let encyclopedia = JSON.parse(localStorage.getItem('encyclopedia')) || {
+    wind:      { content: document.getElementById('wind-content')?.textContent || "Wind energy...", suggestions: [], media: { imageUrl: "", videoUrl: "" } },
+    solar:     { content: document.getElementById('solar-content')?.textContent || "Solar power...", suggestions: [], media: { imageUrl: "", videoUrl: "" } },
+    hydro:     { content: document.getElementById('hydro-content')?.textContent || "Hydroelectric power...", suggestions: [], media: { imageUrl: "", videoUrl: "" } },
+    thermal:   { content: document.getElementById('thermal-content')?.textContent || "Thermal energy...", suggestions: [], media: { imageUrl: "", videoUrl: "" } },
+    biomass:   { content: document.getElementById('biomass-content')?.textContent || "Biomass converts...", suggestions: [], media: { imageUrl: "", videoUrl: "" } },
+    geothermal:{ content: document.getElementById('geothermal-content')?.textContent || "Geothermal taps...", suggestions: [], media: { imageUrl: "", videoUrl: "" } },
+    tidal:     { content: document.getElementById('tidal-content')?.textContent || "Tidal power uses...", suggestions: [], media: { imageUrl: "", videoUrl: "" } },
+    wave:      { content: document.getElementById('wave-content')?.textContent || "Wave energy captures...", suggestions: [], media: { imageUrl: "", videoUrl: "" } }
+  };
+  let comments = JSON.parse(localStorage.getItem('comments')) || {
+    wind:{}, solar:{}, hydro:{}, thermal:{}, biomass:{}, geothermal:{}, tidal:{}, wave:{}, general:[]
+  };
+  let notifications = JSON.parse(localStorage.getItem('notifications')) || [];
+  let commentIdCounter = parseInt(localStorage.getItem('commentIdCounter') || '0');
+
+  // ────────────────────────────────────────────────
+  // Core functions (abbreviated for brevity – expand as needed)
+  // ────────────────────────────────────────────────
+  function updateUI() { /* your existing updateUI logic */ }
+  function showSection(id) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    if (id !== 'general') {
+      document.getElementById(`${id}-content`).textContent = encyclopedia[id].content;
+      renderSectionMedia(id);
+    }
+    // load suggestions & comments...
+  }
+  function renderSectionMedia(section) { /* your existing media render logic */ }
+  function saveSectionMedia(section) { /* your existing save logic */ }
+  function toggleMediaForm(section) { /* your existing toggle logic */ }
+
+  // ... include all other functions you have (login, register, addComment, toggleReaction, speakComment, etc.)
+
+  // Init
+  updateUI();
+  showSection('wind');
+</script>
+</body>
+</html>
