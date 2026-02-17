@@ -1,6 +1,6 @@
-# Energy Vault – Renewables Encyclopedia
+# Karmic Quarks Connect – Renewables Encyclopedia
 
-A client-side, single-file interactive encyclopedia and discussion platform for renewable & new energy technologies.
+A client-side, single-file interactive encyclopedia/social media placform to primarily discuss renewable & new energy technologies.
 
 Built with pure HTML, CSS, and JavaScript — **no backend**, no frameworks, no build step.
 
